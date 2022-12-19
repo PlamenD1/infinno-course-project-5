@@ -10,14 +10,16 @@ public class HttpServletRequest {
     Reader bodyReader;
     String method;
     String pathInfo;
+    public String fullPath;
     Map<String, String> headers = new HashMap<>();
 
-    public HttpServletRequest(HttpServlet servlet, String method, String pathInfo, Reader bodyReader, Map<String, String> headers) {
+    public HttpServletRequest(HttpServlet servlet, String method, String pathInfo, Reader bodyReader, Map<String, String> headers, String fullPath) {
         this.servlet = servlet;
         this.method = method;
         this.pathInfo = pathInfo;
         this.bodyReader = bodyReader;
         this.headers = headers;
+        this.fullPath = fullPath;
     }
 
     public String getHeader(String header) {

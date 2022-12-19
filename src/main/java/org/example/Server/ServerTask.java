@@ -31,9 +31,7 @@ public class ServerTask implements Runnable {
             context.patternServletPairs = Server.getInstance().patternServletPairs;
             System.out.println("GOT SERVLET PAIRS");
 
-
             HttpServletRequest request = parseRequest();
-
 
             System.out.println(request.getMethod() + " " + request.getPathInfo());
             RequestDispatcher dispatcher = new RequestDispatcher(socket);
@@ -68,13 +66,17 @@ public class ServerTask implements Runnable {
             }
         }
 
+        if (servlet == null) {
+            servlet = context.patternServletPairs.get("static-content");
+        }
+
         int endOfFirstPathPart = fullPath.indexOf("/");
         String pathInfo = fullPath.substring(endOfFirstPathPart + 1);
 
 
         Map<String, String> headers = getHeaders(reader);
 
-        return new HttpServletRequest(servlet, method, pathInfo, reader, headers);
+        return new HttpServletRequest(servlet, method, pathInfo, reader, headers, fullPath);
     }
 
     private Map<String, String> getHeaders(BufferedReader reader) throws IOException {
