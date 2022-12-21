@@ -46,12 +46,16 @@ public class HttpServletResponse {
     public OutputStream getOutputStream() throws IOException {
         final int[] contentLength = {0};
         writingBody = true;
-        outputStream = new OutputStream() {
+        outputStream = new ByteArrayOutputStream() {
             boolean closed = false;
             @Override
-            public void write(int b) throws IOException {
+            public void write(int b) {
                 if (closed)
-                    throw new IOException("OutputStream is closed!");
+                    try {
+                        throw new IOException("OutputStream is closed!");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
 
                 contentLength[0]++;
                 try {
@@ -91,6 +95,7 @@ public class HttpServletResponse {
                 }
                 socket.getOutputStream().write(("Content-Length: " + contentLength[0]).getBytes());
                 socket.getOutputStream().write("\n".getBytes());
+                this.writeTo(socket.getOutputStream());
             }
         };
 
