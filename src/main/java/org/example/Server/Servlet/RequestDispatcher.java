@@ -1,5 +1,8 @@
 package org.example.Server.Servlet;
 
+import org.example.Server.Filters.FilterChain;
+import org.example.Server.Filters.Interfaces.Filter;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -9,15 +12,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RequestDispatcher {
     final List<String> VALID_METHODS = List.of("GET", "POST", "PUT", "DELETE");
-    //    ServletContext.Context staticContentContext;
+    FilterChain chain;
     HttpServlet servlet;
     public Socket socket;
 
-    public RequestDispatcher(HttpServlet servlet) {
+    public RequestDispatcher(HttpServlet servlet, FilterChain chain) {
         this.servlet = servlet;
+        this.chain = chain;
     }
 
     public void dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -45,22 +51,7 @@ public class RequestDispatcher {
             return;
         }
 
-        switch (request.method) {
-            case "GET": {
-                System.out.println("DO GET DISPATCHER");
-                request.servlet.doGet(request, response);
-                break;
-            }
-            case "POST":
-                request.servlet.doPost(request, response);
-                break;
-            case "PUT":
-                request.servlet.doPut(request, response);
-                break;
-            case "DELETE":
-                request.servlet.doDelete(request, response);
-                break;
-        }
+        chain.doFilter(request, response);
 
         socket.close();
         System.out.println("SOCKET CLOSED");

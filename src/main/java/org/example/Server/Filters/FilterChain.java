@@ -1,6 +1,7 @@
 package org.example.Server.Filters;
 
 import org.example.Server.Filters.Interfaces.Filter;
+import org.example.Server.ServerTask;
 import org.example.Server.Servlet.HttpServlet;
 import org.example.Server.Servlet.HttpServletRequest;
 import org.example.Server.Servlet.HttpServletResponse;
@@ -12,19 +13,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class FilterChain {
-    RequestDispatcher dispatcher;
+    HttpServlet servlet;
     public List<Filter> filters = new LinkedList<>();
     int filterNumber = 0;
 
-    public FilterChain(RequestDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
+    public FilterChain(HttpServlet servlet) {
+        this.servlet = servlet;
     }
 
     public void doFilter(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (filterNumber >= filters.size()) {
             try {
                 System.out.println("DISPATCHING");
-                dispatcher.dispatch(request, response);
+                servlet.service(request, response);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

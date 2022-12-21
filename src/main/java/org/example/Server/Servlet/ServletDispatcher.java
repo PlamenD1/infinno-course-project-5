@@ -20,7 +20,9 @@ public class ServletDispatcher {
         String docPath = request.fullPath.substring(1, endOfDocBase);
 
         ServletContext context = pathContextPairs.get(docPath);
+
         request.fullPath = request.fullPath.substring(docPath.length() + 1);
+
         RequestDispatcher dispatcher = context.getRequestDispatcher(request.fullPath);
         dispatcher.socket = socket;
 
@@ -31,26 +33,6 @@ public class ServletDispatcher {
 
         HttpServletResponse response = new HttpServletResponse();
         response.outputStream = socket.getOutputStream();
-        FilterChain chain = new FilterChain(dispatcher);
-        buildFilterList(chain, request.fullPath, context);
-        chain.doFilter(request, response);
-    }
-
-    void buildFilterList(FilterChain chain, String path, ServletContext context) {
-        Matcher matcher = null;
-        Filter filter = null;
-
-        for (var entry : context.patternFilterPairs.entrySet()) {
-            Pattern pattern = Pattern.compile(entry.getKey());
-            matcher = pattern.matcher(path);
-            if (matcher.find()) {
-                filter = entry.getValue();
-                break;
-            }
-        }
-
-        if (filter != null)
-            chain.filters.add(filter);
     }
 
     public void addContext(String path, ServletContext context) {

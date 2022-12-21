@@ -7,6 +7,25 @@ public abstract class HttpServlet {
     public HttpServlet() {};
     public abstract void init();
 
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        switch (request.method) {
+            case "GET": {
+                System.out.println("DO GET DISPATCHER");
+                request.servlet.doGet(request, response);
+                break;
+            }
+            case "POST":
+                request.servlet.doPost(request, response);
+                break;
+            case "PUT":
+                request.servlet.doPut(request, response);
+                break;
+            case "DELETE":
+                request.servlet.doDelete(request, response);
+                break;
+        }
+    }
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         sendNotSupportedError(resp);
     }

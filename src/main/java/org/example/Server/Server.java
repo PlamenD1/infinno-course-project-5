@@ -27,18 +27,20 @@ public class Server {
     ExecutorService threadPool;
 
     Server() throws Exception {
-        XMLParser xmlParser = new XMLParser();
-        String serverXMLPath = "src/main/java/org/example/Server/Config/server.xml";
-        this.configuration = xmlParser.parseConfiguration(serverXMLPath);
-
-        this.threadPool = Executors.newFixedThreadPool(5);
+//        XMLParser xmlParser = new XMLParser();
+//        String serverXMLPath = "src/main/java/org/example/Server/Config/server.xml";
+//        this.configuration = xmlParser.parseConfiguration(serverXMLPath);
+//
+//        this.threadPool = Executors.newFixedThreadPool(5);
     }
     public static void main(String[] args) throws Exception {
-        Server server = Server.getInstance();
 
-        server.initServletContexts();
-
-        server.connect();
+        System.out.println(Server.getInstance().getClass().getClassLoader().getResource("web.xml"));
+//        Server server = Server.getInstance();
+//
+//        server.initServletContexts();
+//
+//        server.connect();
     }
 
     void initServletContexts() throws Exception {
