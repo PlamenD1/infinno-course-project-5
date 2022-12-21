@@ -1,7 +1,10 @@
 package org.example.Server.Servlet;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +19,7 @@ public class HttpServletResponse {
 
     int status;
     public OutputStream outputStream;
-
+    Socket socket;
     boolean writingBody;
 
     Map<String, String> headers = new HashMap<>();
@@ -41,25 +44,47 @@ public class HttpServletResponse {
     }
 
     public OutputStream getOutputStream() throws IOException {
-        outputStream.write(("HTTP/1.1 " + status + "\n").getBytes());
-
-        if (!cookies.isEmpty()) {
-            String cookieHeaderName = "Cookies";
-            StringBuilder cookieHeaderValue = new StringBuilder();
-            for (var cookie : cookies.entrySet()) {
-                cookieHeaderValue.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
-            }
-            cookieHeaderValue.deleteCharAt(cookieHeaderValue.length() - 1);
-
-            headers.put(cookieHeaderName, cookieHeaderValue.toString());
-        }
-
-        for (var entity : headers.entrySet()) {
-            outputStream.write((entity.getKey() + ":" + entity.getValue() + "\n").getBytes());
-        }
-        outputStream.write("\n".getBytes());
-
+        final int[] contentLength = {0};
         writingBody = true;
+        outputStream = new OutputStream() {
+            @Override
+            public void write(int b) {
+                contentLength[0]++;
+                try {
+                    write(new byte[] {(byte) b});
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                contentLength[0] += b.length;
+                write(b, 0, b.length);
+            }
+
+            @Override
+            public void close() throws IOException {
+                socket.getOutputStream().write(("HTTP/1.1 " + status + "\n").getBytes());
+
+                if (!cookies.isEmpty()) {
+                    String cookieHeaderName = "Cookies";
+                    StringBuilder cookieHeaderValue = new StringBuilder();
+                    for (var cookie : cookies.entrySet()) {
+                        cookieHeaderValue.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
+                    }
+                    cookieHeaderValue.deleteCharAt(cookieHeaderValue.length() - 1);
+
+                    headers.put(cookieHeaderName, cookieHeaderValue.toString());
+                }
+
+                for (var entity : headers.entrySet()) {
+                    socket.getOutputStream().write((entity.getKey() + ":" + entity.getValue() + "\n").getBytes());
+                }
+                socket.getOutputStream().write(("Content-Length: " + contentLength[0]).getBytes());
+                socket.getOutputStream().write("\n".getBytes());
+            }
+        };
 
         return outputStream;
     }
