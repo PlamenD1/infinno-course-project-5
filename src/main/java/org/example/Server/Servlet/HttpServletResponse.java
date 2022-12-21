@@ -47,8 +47,12 @@ public class HttpServletResponse {
         final int[] contentLength = {0};
         writingBody = true;
         outputStream = new OutputStream() {
+            boolean closed = false;
             @Override
-            public void write(int b) {
+            public void write(int b) throws IOException {
+                if (closed)
+                    throw new IOException("OutputStream is closed!");
+
                 contentLength[0]++;
                 try {
                     write(new byte[] {(byte) b});
@@ -59,12 +63,16 @@ public class HttpServletResponse {
 
             @Override
             public void write(byte[] b) throws IOException {
+                if (closed)
+                    throw new IOException("OutputStream is closed!");
+
                 contentLength[0] += b.length;
                 write(b, 0, b.length);
             }
 
             @Override
             public void close() throws IOException {
+                closed = true;
                 socket.getOutputStream().write(("HTTP/1.1 " + status + "\n").getBytes());
 
                 if (!cookies.isEmpty()) {
