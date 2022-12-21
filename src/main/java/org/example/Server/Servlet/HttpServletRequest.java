@@ -7,24 +7,24 @@ import java.util.Map;
 
 public class HttpServletRequest {
 
-    ServletContext.Context staticContentContext;
     HttpServlet servlet;
     Reader bodyReader;
     String method;
     String pathInfo;
     public String fullPath;
+    String docBase;
     Map<String, String> queryParams = new HashMap<>();
     Map<String, String> headers;
     Map<String, String> cookies = new HashMap<>();
 
-    public HttpServletRequest(HttpServlet servlet, String method, String pathInfo, Reader bodyReader, Map<String, String> headers, String fullPath, ServletContext.Context staticContentContext) {
+    public HttpServletRequest(HttpServlet servlet, String method, String pathInfo, Reader bodyReader, Map<String, String> headers, String fullPath, String docBase) {
         this.servlet = servlet;
         this.method = method;
         this.pathInfo = pathInfo;
         this.bodyReader = bodyReader;
         this.headers = headers;
         this.fullPath = fullPath;
-        this.staticContentContext = staticContentContext;
+        this.docBase = docBase;
         buildQueryParams();
         fillCookiesMap();
     }

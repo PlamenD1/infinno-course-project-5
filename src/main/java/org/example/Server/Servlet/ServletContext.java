@@ -5,28 +5,45 @@ import org.example.Server.Filters.Interfaces.Filter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ServletContext {
-    public static class Context {
-        public boolean reloadable;
-        public String docBase;
-
-        public Context(boolean reloadable, String docBase) {
-            this.reloadable = reloadable;
-            this.docBase = docBase;
-        }
-    }
-    private static ServletContext instance;
+    public String docBase;
     public Map<String, HttpServlet> patternServletPairs = new HashMap<>();
     public Map<String, Filter> patternFilterPairs = new LinkedHashMap<>();
-    public Map<String, Context> pathContextPairs = new HashMap<>();
 
-    private ServletContext() {}
+    public ServletContext() {}
 
-    public static ServletContext getInstance() {
-        if (instance == null)
-            instance = new ServletContext();
+    public void addServlet(String pattern, HttpServlet servlet) {
+        patternServletPairs.put(pattern, servlet);
+    }
 
-        return instance;
+    public void addFilter(String pattern, Filter filter) {
+        patternFilterPairs.put(pattern, filter);
+    }
+
+    public RequestDispatcher getRequestDispatcher(String path) {
+        Matcher matcher = null;
+        HttpServlet servlet = null;
+
+        for (var entry : patternServletPairs.entrySet()) {
+            Pattern pattern = Pattern.compile(entry.getKey());
+            matcher = pattern.matcher(path);
+            if (matcher.find()) {
+                servlet = entry.getValue();
+                break;
+            }
+        }
+
+        if (servlet == null) {
+            servlet = patternServletPairs.get("static-content");
+        }
+
+        RequestDispatcher dispatcher = new RequestDispatcher(servlet);
+        System.out.println(patternServletPairs);
+        System.out.println("servlet: " + servlet);
+
+        return dispatcher;
     }
 }

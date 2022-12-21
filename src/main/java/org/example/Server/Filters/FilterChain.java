@@ -12,17 +12,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class FilterChain {
-    Socket socket;
+    RequestDispatcher dispatcher;
     public List<Filter> filters = new LinkedList<>();
     int filterNumber = 0;
 
-    public FilterChain(Socket socket) {
-        this.socket = socket;
+    public FilterChain(RequestDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
     public void doFilter(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (filterNumber >= filters.size()) {
-            RequestDispatcher dispatcher = new RequestDispatcher(socket);
             try {
                 System.out.println("DISPATCHING");
                 dispatcher.dispatch(request, response);

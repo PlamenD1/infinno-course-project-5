@@ -24,7 +24,7 @@ public class StaticContentServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
         List<String> listing = new ArrayList<>();
-        String docBase = request.staticContentContext.docBase;
+        String docBase = request.docBase;
 
         File file = new File(docBase + request.fullPath);
 
@@ -35,36 +35,36 @@ public class StaticContentServlet extends HttpServlet {
                 if (indexHtml.exists())
                     setBodyAndHeaders(indexHtml, response);
                 else {
-                        final int[] deepness = {0};
-                        final String[] observedPath = {System.getProperty("user.dir")};
-                        String[] pathPieces = docBase.split("/");
+                    final int[] deepness = {0};
+                    final String[] observedPath = {System.getProperty("user.dir")};
+                    String[] pathPieces = docBase.split("/");
 
-                        Files.walkFileTree(Path.of(docBase), new SimpleFileVisitor<>() {
-                            @Override
-                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                                listing.add(file.toString());
+                    Files.walkFileTree(Path.of(docBase), new SimpleFileVisitor<>() {
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                            listing.add(file.toString());
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                            if ((dir.toString() + "\\").equals(observedPath[0])) {
+                                if (pathPieces.length > 0) {
+                                    observedPath[0] += pathPieces[deepness[0]];
+                                }
+                                if (deepness[0] + 1 < pathPieces.length)
+                                    deepness[0]++;
                                 return FileVisitResult.CONTINUE;
                             }
 
-                            @Override
-                            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                                if ((dir.toString() + "\\").equals(observedPath[0])) {
-                                    if (pathPieces.length > 0) {
-                                        observedPath[0] += pathPieces[deepness[0]];
-                                    }
-                                    if (deepness[0] + 1 < pathPieces.length)
-                                        deepness[0]++;
-                                    return FileVisitResult.CONTINUE;
-                                }
+                            listing.add(dir.toString());
+                            return FileVisitResult.SKIP_SUBTREE;
+                        }
+                    });
 
-                                listing.add(dir.toString());
-                                return FileVisitResult.SKIP_SUBTREE;
-                            }
-                        });
-
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        response.addHeader("Content-Type", "text/html");
-                        response.getOutputStream().write(buildHtml(listing));
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.addHeader("Content-Type", "text/html");
+                    response.getOutputStream().write(buildHtml(listing));
                 }
             } else {
                 if (!file.exists()) {

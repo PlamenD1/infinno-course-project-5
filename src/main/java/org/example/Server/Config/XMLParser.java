@@ -10,6 +10,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class XMLParser {
     DocumentBuilder docBuilder;
@@ -19,27 +22,37 @@ public class XMLParser {
         docBuilder = factory.newDocumentBuilder();
     }
 
-    public ServletContext parseServletContext(String fileName) throws Exception {
-        Document doc = docBuilder.parse(new File(fileName));
+    public ServletContext parseServletContext(File webXML) throws Exception {
+        ServletContext context = new ServletContext();
+        Document web = docBuilder.parse(webXML);
 
-        ServletContext servletContext = ServletContext.getInstance();
+        Map<String, Object> servlets = fillSetOfType(web, "servlet");
+        Map<String, String> servletMappings = fillMappingsListOfType(web, "servlet");
 
+        Map<String, Object> filters = fillSetOfType(web, "filter");
+        Map<String, String> filterMappings = fillMappingsListOfType(web, "filter");
 
+        for (var sm : servletMappings.entrySet()) {
+            HttpServlet servlet = (HttpServlet) servlets.get(sm.getKey());
+            if (servlet == null)
+                throw new ParserConfigurationException("Invalid servlet name for element with tag: servlet-mapping!");
 
-        //todo
-        return ServletContext.getInstance();
+            context.patternServletPairs.put(sm.getValue(), servlet);
+        }
+
+        for (var fm : filterMappings.entrySet()) {
+            Filter filter = (Filter) filters.get(fm.getKey());
+            if (filter == null)
+                throw new ParserConfigurationException("Invalid servlet name for element with tag: filter-mapping!");
+
+            context.patternFilterPairs.put(fm.getValue(), filter);
+        }
+
+        return context;
     }
 
-    public Configuration parseConfiguration(String webXML, String serverXML) throws Exception {
+    public Configuration parseConfiguration(String serverXML) throws Exception {
         Configuration configuration = new Configuration();
-
-        Document web = docBuilder.parse(new File(webXML));
-
-        fillSetOfType(configuration, web, "servlet");
-        fillMappingsListOfType(configuration, web, "servlet");
-
-        fillSetOfType(configuration, web, "filter");
-        fillMappingsListOfType(configuration, web, "filter");
 
         Document server = docBuilder.parse(new File(serverXML));
 
@@ -122,7 +135,8 @@ public class XMLParser {
     }
 
     @SuppressWarnings("unchecked")
-    public void fillSetOfType(Configuration configuration, Document doc, String type) throws Exception {
+    public Map<String, Object> fillSetOfType(Document doc, String type) throws Exception {
+        Map<String, Object> result = new LinkedHashMap<>();
         NodeList items = doc.getElementsByTagName(type);
 
         for (int i = 0; i < items.getLength(); i++) {
@@ -137,7 +151,7 @@ public class XMLParser {
             Node classNode = children.item(3);
 
             if (!nameNode.getNodeName().equals(type + "-name") ||
-                !classNode.getNodeName().equals(type + "-class"))
+                    !classNode.getNodeName().equals(type + "-class"))
                 throw new ParserConfigurationException("Invalid children for element with tag: " + type + "!");
 
             String name = nameNode.getTextContent();
@@ -149,17 +163,24 @@ public class XMLParser {
 
                 Class<? extends HttpServlet> servletClass = (Class<? extends HttpServlet>) unprobedClass;
 
-                configuration.addServlet(new ServletFromXML(name, servletClass));
+                HttpServlet servlet = servletClass.getDeclaredConstructor().newInstance();
+
+                result.put(name, servlet);
             } else if (type.equals("filter")) {
                 if (!Filter.class.isAssignableFrom(unprobedClass))
                     throw new ParserConfigurationException("Invalid " + unprobedClass + " for filter!");
 
-                configuration.addFilter(new FilterFromXML(name, unprobedClass));
+                Filter filter = (Filter) unprobedClass.getDeclaredConstructor().newInstance();
+
+                result.put(name, filter);
             }
         }
+
+        return result;
     }
 
-    public void fillMappingsListOfType(Configuration configuration, Document doc, String type) throws Exception {
+    public Map<String, String> fillMappingsListOfType(Document doc, String type) throws Exception {
+        Map<String, String> result = new HashMap<>();
         NodeList mappings = doc.getElementsByTagName(type + "-mapping");
 
         for (int i = 0; i < mappings.getLength(); i++) {
@@ -180,11 +201,9 @@ public class XMLParser {
             String name = nameNode.getTextContent();
             String urlPattern = urlPatternNode.getTextContent();
 
-            if (type.equals("servlet"))
-                configuration.addServletMappings(new ServletMapping(name, urlPattern));
-            else if (type.equals("filter"))
-                configuration.addFilterMapping(new FilterMapping(name, urlPattern));
-
+            result.put(name, urlPattern);
         }
+
+        return result;
     }
 }

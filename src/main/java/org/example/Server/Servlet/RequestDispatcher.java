@@ -12,11 +12,12 @@ import java.util.Map;
 
 public class RequestDispatcher {
     final List<String> VALID_METHODS = List.of("GET", "POST", "PUT", "DELETE");
-    ServletContext.Context staticContentContext;
-    Socket socket;
+    //    ServletContext.Context staticContentContext;
+    HttpServlet servlet;
+    public Socket socket;
 
-    public RequestDispatcher(Socket socket) {
-        this.socket = socket;
+    public RequestDispatcher(HttpServlet servlet) {
+        this.servlet = servlet;
     }
 
     public void dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -40,15 +41,6 @@ public class RequestDispatcher {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.addHeader("Content-Type", "text/plain");
             response.getOutputStream().write("Bad Request - Missing servlet!".getBytes());
-
-            return;
-        }
-
-        if (request.staticContentContext == null) {
-            System.out.println("BAD REQUEST - NON-EXISTING CONTEXT");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.addHeader("Content-Type", "text/plain");
-            response.getOutputStream().write("Bad Request - Non-existing context!".getBytes());
 
             return;
         }
