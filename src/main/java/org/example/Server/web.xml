@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
          version="5.0">
-
     <servlet>
         <servlet-name>StaticContentServlet</servlet-name>
         <servlet-class>org.example.Server.Servlet.StaticContentServlet</servlet-class>
@@ -12,15 +11,57 @@
         <servlet-name>StaticContentServlet</servlet-name>
         <url-pattern>static-content</url-pattern>
     </servlet-mapping>
-
     <servlet>
-        <servlet-name>RandomServlet</servlet-name>
-        <servlet-class>org.example.RandomServlet</servlet-class>
+        <servlet-name>PostsServlet</servlet-name>
+        <servlet-class>org.example.PostAPI.Servlets.PostsServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>RandomServlet</servlet-name>
-        <url-pattern>/random/*</url-pattern>
+        <servlet-name>PostsServlet</servlet-name>
+        <url-pattern>/posts/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>CommentsServlet</servlet-name>
+        <servlet-class>org.example.PostAPI.Servlets.CommentsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CommentsServlet</servlet-name>
+        <url-pattern>/comments/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>org.example.PostAPI.Servlets.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>org.example.PostAPI.Servlets.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/register/*</url-pattern>
     </servlet-mapping>
 
-
+<!--    <filter>-->
+<!--        <filter-name>LogFilter</filter-name>-->
+<!--        <filter-class>org.example.PostAPI.Filters.LogFilter</filter-class>-->
+<!--    </filter>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>LogFilter</filter-name>-->
+<!--        <url-pattern>/*</url-pattern>-->
+<!--    </filter-mapping>-->
+<!--    <filter>-->
+<!--        <filter-name>AuthFilter</filter-name>-->
+<!--        <filter-class>org.example.PostAPI.Filters.AuthFilter</filter-class>-->
+<!--    </filter>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>AuthFilter</filter-name>-->
+<!--        <url-pattern>/posts/*</url-pattern>-->
+<!--    </filter-mapping>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>AuthFilter</filter-name>-->
+<!--        <url-pattern>/comments/*</url-pattern>-->
+<!--    </filter-mapping>-->
 </web-app>

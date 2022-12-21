@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration advertiser="multicastdns">
+    <Appenders>
+        <File name="OutFileNormal" fileName="C:\Users\plame\IdeaProjects\infinno-test-20-tokens\src\main\java\com\example\infinnotest20tokens\info.log" immediateFlush="true" append="true">
+            <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+        <File name="OutFileError" fileName="C:\Users\plame\IdeaProjects\infinno-test-20-tokens\src\main\java\com\example\infinnotest20tokens\error.log" immediateFlush="true" append="true">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n - console"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="OutFileError"/>
+            <AppenderRef ref="OutFileNormal"/>
+        </Root>
+    </Loggers>
+</Configuration>

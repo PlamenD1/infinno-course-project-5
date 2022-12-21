@@ -20,6 +20,7 @@ public class HttpServletResponse {
     boolean writingBody;
 
     Map<String, String> headers = new HashMap<>();
+    Map<String, String> cookies = new HashMap<>();
 
     public void setStatus(int status) {
         if (writingBody) {
@@ -41,6 +42,18 @@ public class HttpServletResponse {
 
     public OutputStream getOutputStream() throws IOException {
         outputStream.write(("HTTP/1.1 " + status + "\n").getBytes());
+
+        if (!cookies.isEmpty()) {
+            String cookieHeaderName = "Cookies";
+            StringBuilder cookieHeaderValue = new StringBuilder();
+            for (var cookie : cookies.entrySet()) {
+                cookieHeaderValue.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
+            }
+            cookieHeaderValue.deleteCharAt(cookieHeaderValue.length() - 1);
+
+            headers.put(cookieHeaderName, cookieHeaderValue.toString());
+        }
+
         for (var entity : headers.entrySet()) {
             outputStream.write((entity.getKey() + ":" + entity.getValue() + "\n").getBytes());
         }
@@ -49,5 +62,16 @@ public class HttpServletResponse {
         writingBody = true;
 
         return outputStream;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+    }
+    public void addCookie(String name, String value) {
+        cookies.put(name, value);
     }
 }

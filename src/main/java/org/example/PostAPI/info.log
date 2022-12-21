@@ -1,0 +1,18 @@
+2022-12-12 23:56:42.043 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.logging.LogFactory - Logging initialized using 'class org.apache.ibatis.logging.slf4j.Slf4jImpl' adapter.
+2022-12-12 23:56:42.063 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.063 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.063 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.064 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.125 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.125 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.125 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.126 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - PooledDataSource forcefully closed/removed all connections.
+2022-12-12 23:56:42.163 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.transaction.jdbc.JdbcTransaction - Opening JDBC Connection
+2022-12-12 23:56:42.430 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - Created connection 296455293.
+2022-12-12 23:56:42.430 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.transaction.jdbc.JdbcTransaction - Setting autocommit to false on JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@11ab8c7d]
+2022-12-12 23:56:42.433 [http-nio-8080-exec-6] DEBUG com.example.infinnotest20tokens.Interfaces.LoginMapper.getUserSalt - ==>  Preparing: SELECT salt FROM users WHERE username = ?
+2022-12-12 23:56:42.461 [http-nio-8080-exec-6] DEBUG com.example.infinnotest20tokens.Interfaces.LoginMapper.getUserSalt - ==> Parameters: user32(String)
+2022-12-12 23:56:42.491 [http-nio-8080-exec-6] DEBUG com.example.infinnotest20tokens.Interfaces.LoginMapper.getUserSalt - <==      Total: 0
+2022-12-12 23:56:42.493 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.transaction.jdbc.JdbcTransaction - Resetting autocommit to true on JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@11ab8c7d]
+2022-12-12 23:56:42.493 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.transaction.jdbc.JdbcTransaction - Closing JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@11ab8c7d]
+2022-12-12 23:56:42.494 [http-nio-8080-exec-6] DEBUG org.apache.ibatis.datasource.pooled.PooledDataSource - Returned connection 296455293 to pool.

@@ -1,0 +1,1 @@
+2022-12-12 23:56:42.498 [http-nio-8080-exec-6] ERROR com.example.infinnotest20tokens.Filters.LogFilter - Error 401: time for execution: 367ms POST /login

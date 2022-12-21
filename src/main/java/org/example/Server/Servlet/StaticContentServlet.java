@@ -15,24 +15,31 @@ import java.util.List;
 
 public class StaticContentServlet extends HttpServlet {
     @Override
+    public void init() {
+
+    }
+
+    public StaticContentServlet() {}
+
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) {
         List<String> listing = new ArrayList<>();
-        File file = new File(request.pathInfo);
+        String docBase = request.staticContentContext.docBase;
 
-        request.fullPath = request.fullPath.substring(0, request.fullPath.length() - 1);
+        File file = new File(docBase + request.fullPath);
 
         try {
             if (file.isDirectory()) {
-                File indexHtml = new File(request.fullPath + "\\index.html");
+                File indexHtml = new File(docBase + "\\index.html");
 
                 if (indexHtml.exists())
                     setBodyAndHeaders(indexHtml, response);
                 else {
                         final int[] deepness = {0};
                         final String[] observedPath = {System.getProperty("user.dir")};
-                        String[] pathPieces = request.fullPath.split("/");
+                        String[] pathPieces = docBase.split("/");
 
-                        Files.walkFileTree(Path.of(request.fullPath), new SimpleFileVisitor<>() {
+                        Files.walkFileTree(Path.of(docBase), new SimpleFileVisitor<>() {
                             @Override
                             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                                 listing.add(file.toString());
@@ -61,7 +68,6 @@ public class StaticContentServlet extends HttpServlet {
                 }
             } else {
                 if (!file.exists()) {
-                    System.out.println(file.getAbsolutePath());
                     sendNotFound(response);
                     return;
                 }
@@ -124,20 +130,5 @@ public class StaticContentServlet extends HttpServlet {
                 .append("</html>\n");
 
         return sb.toString().getBytes(StandardCharsets.UTF_8);
-    }
-
-    @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) {
-
-    }
-
-    @Override
-    public void doPut(HttpServletRequest request, HttpServletResponse response) {
-
-    }
-
-    @Override
-    public void doDelete(HttpServletRequest request, HttpServletResponse response) {
-
     }
 }

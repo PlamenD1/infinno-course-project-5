@@ -1,4 +1,4 @@
-package org.example.Server.Config;
+package org.example.Server.Config.Models;
 
 public class ServletMapping {
     public String name;
