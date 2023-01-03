@@ -1,9 +1,6 @@
 package org.example.Server.Servlet;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -18,12 +15,17 @@ public class HttpServletResponse {
     public static int SC_UNAUTHORIZED = 401; // Status code (401) indicating that the request requires HTTP authentication.
 
     int status;
-    public OutputStream outputStream;
+    String statusMessage;
+    public ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     Socket socket;
     boolean writingBody;
 
     Map<String, String> headers = new HashMap<>();
     Map<String, String> cookies = new HashMap<>();
+
+    public HttpServletResponse(Socket socket) {
+        this.socket = socket;
+    }
 
     public void setStatus(int status) {
         if (writingBody) {
@@ -44,61 +46,7 @@ public class HttpServletResponse {
     }
 
     public OutputStream getOutputStream() throws IOException {
-        final int[] contentLength = {0};
         writingBody = true;
-        outputStream = new ByteArrayOutputStream() {
-            boolean closed = false;
-            @Override
-            public void write(int b) {
-                if (closed)
-                    try {
-                        throw new IOException("OutputStream is closed!");
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                contentLength[0]++;
-                try {
-                    write(new byte[] {(byte) b});
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void write(byte[] b) throws IOException {
-                if (closed)
-                    throw new IOException("OutputStream is closed!");
-
-                contentLength[0] += b.length;
-                write(b, 0, b.length);
-            }
-
-            @Override
-            public void close() throws IOException {
-                closed = true;
-                socket.getOutputStream().write(("HTTP/1.1 " + status + "\n").getBytes());
-
-                if (!cookies.isEmpty()) {
-                    String cookieHeaderName = "Cookies";
-                    StringBuilder cookieHeaderValue = new StringBuilder();
-                    for (var cookie : cookies.entrySet()) {
-                        cookieHeaderValue.append(cookie.getKey()).append("=").append(cookie.getValue()).append(";");
-                    }
-                    cookieHeaderValue.deleteCharAt(cookieHeaderValue.length() - 1);
-
-                    headers.put(cookieHeaderName, cookieHeaderValue.toString());
-                }
-
-                for (var entity : headers.entrySet()) {
-                    socket.getOutputStream().write((entity.getKey() + ":" + entity.getValue() + "\n").getBytes());
-                }
-                socket.getOutputStream().write(("Content-Length: " + contentLength[0]).getBytes());
-                socket.getOutputStream().write("\n".getBytes());
-                this.writeTo(socket.getOutputStream());
-            }
-        };
-
         return outputStream;
     }
 
@@ -111,5 +59,29 @@ public class HttpServletResponse {
     }
     public void addCookie(String name, String value) {
         cookies.put(name, value);
+    }
+
+    public void sendResponse() throws IOException {
+        OutputStream os = socket.getOutputStream();
+        OutputStreamWriter out = new OutputStreamWriter(os);
+
+        sendStatus(out);
+
+        headers.put("Content-Length", String.valueOf(outputStream.size()));
+        sendHeaders(out);
+        out.flush();
+
+        outputStream.writeTo(os);
+    }
+
+    void sendStatus(OutputStreamWriter out) throws IOException {
+        out.write("HTTP/1.1 " + status + "\n");
+    }
+
+    void sendHeaders(OutputStreamWriter out) throws IOException {
+        for (var entry : headers.entrySet()) {
+            out.write(entry.getKey() + ":" + entry.getValue() + "\n");
+        }
+        out.write("\n");
     }
 }

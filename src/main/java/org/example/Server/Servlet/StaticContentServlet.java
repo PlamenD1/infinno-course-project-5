@@ -15,9 +15,7 @@ import java.util.List;
 
 public class StaticContentServlet extends HttpServlet {
     @Override
-    public void init() {
-
-    }
+    public void init() {}
 
     public StaticContentServlet() {}
 

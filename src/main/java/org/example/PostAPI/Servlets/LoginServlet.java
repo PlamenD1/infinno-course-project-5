@@ -11,15 +11,13 @@ import org.example.PostAPI.Services.TokensDAO;
 import org.example.Server.Servlet.HttpServlet;
 import org.example.Server.Servlet.HttpServletRequest;
 import org.example.Server.Servlet.HttpServletResponse;
+import org.example.Server.Session.HttpSession;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.Random;
 
 import static org.example.Server.Servlet.HttpServletResponse.*;
 
@@ -46,9 +44,6 @@ public class LoginServlet extends HttpServlet {
         String userString = request.getParameter("user");
         String passString = request.getParameter("pass");
 
-        System.out.println(userString);
-        System.out.println(passString);
-
         if (userString == null ||
                 passString == null) {
             sendError(response, SC_UNAUTHORIZED, "Username or password is empty! USER NOT LOGGED IN!");
@@ -61,12 +56,13 @@ public class LoginServlet extends HttpServlet {
             return;
         }
         String hashPass = DigestUtils.sha1Hex(passString.concat(salt.toString()));
-
-        String path = request.getPathInfo();
-        if (path != null && !path.equals("/"))
-            sendError(response, SC_NOT_FOUND, "404 Not Found!");
-
-
+//
+//        String path = request.getPathInfo();
+//        System.out.println("PATH: " + path);
+//        if (path != null && !path.equals("/")) {
+//            sendError(response, SC_NOT_FOUND, "404 Not Found!");
+//            return;
+//        }
         Integer userId = loginDAO.login(new User(userString, hashPass));
         System.out.println(userId);
         if (userId == null) {
@@ -81,6 +77,9 @@ public class LoginServlet extends HttpServlet {
             token = generateToken(userId);
             tokensDAO.createToken(token);
         }
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute("user", userString);
 
         response.setStatus(SC_OK);
         response.setHeader("Authorization", "Bearer " + token.token);

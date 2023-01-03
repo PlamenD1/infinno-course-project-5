@@ -17,19 +17,19 @@ import java.util.regex.Pattern;
 public class ServerTask implements Runnable {
     Socket socket;
     public ServerTask(Socket socket) {
-        System.out.println("NEW SERVER TASK CREATED!");
+        
         this.socket = socket;
     }
 
     @Override
     public void run() {
-        System.out.println("IN RUN METHOD!");
+        
         try {
             HttpServletRequest request = parseRequest();
             ServletDispatcher dispatcher = ServletDispatcher.getInstance();
             dispatcher.dispatch(request, socket);
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage() + " IN ServerTask.java");
+            
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -46,7 +46,6 @@ public class ServerTask implements Runnable {
         if (!fullPath.endsWith("/")) {
             fullPath = fullPath.concat("/");
         }
-
         String pathInfo = getPathInfo(fullPath);
 
         Map<String, String> headers = getHeaders(reader);
@@ -58,23 +57,17 @@ public class ServerTask implements Runnable {
         if (path.contains("?"))
             path = path.substring(0, path.length() - 1);
 
-        System.out.println("PATH 1: " + path);
-
         int indexOfParamQuery = path.indexOf("?");
 
         if (indexOfParamQuery != -1) {
             path = path.substring(0, indexOfParamQuery) + "/";
         }
 
-        System.out.println("PATH 2: " + path);
-
-
         String pathInfo;
         int endOfFirstPathPart = path.substring(1).indexOf("/");
         pathInfo = path.substring(endOfFirstPathPart + 1);
-        System.out.println("PATHINFO 1: " + pathInfo);
-
-        System.out.println("GOT PATHINFO: " + pathInfo);
+        int endOfSecondPathPart = pathInfo.substring(1).indexOf("/");
+        pathInfo = pathInfo.substring(endOfSecondPathPart + 1);
 
         return pathInfo;
     }
@@ -87,7 +80,6 @@ public class ServerTask implements Runnable {
         String line = reader.readLine();
         while (!line.equals("")) {
             String[] header = line.split(":");
-
             result.put(header[0], header[1]);
 
             line = reader.readLine();

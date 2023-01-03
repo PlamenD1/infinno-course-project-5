@@ -11,6 +11,7 @@ import com.google.gson.GsonBuilder;
 import org.example.Server.Servlet.HttpServlet;
 import org.example.Server.Servlet.HttpServletRequest;
 import org.example.Server.Servlet.HttpServletResponse;
+import org.example.Server.Session.HttpSession;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,20 +33,25 @@ public class PostsServlet extends HttpServlet {
     PostsDAO postsDAO = new PostsDAO();
     TokensDAO tokensDAO = new TokensDAO();
 
-    public PostsServlet() throws FileNotFoundException {}
-
-    public void init() {
+    public PostsServlet() throws FileNotFoundException {
         patterns.put("singleNumberPath", Pattern.compile("\\/(\\d+)")); //get single post; update post; delete post
         patterns.put("commentsOfSinglePost", Pattern.compile("\\/(\\d+)/comments")); //get comments of single post
     }
 
+    public void init() {
+
+    }
+
     PathInfo getPath(HttpServletRequest request) {
         String path = request.getPathInfo();
-        System.out.println(path);
+        System.out.println(path + " PATHNAME HERE");
         if (path == null || path.equals("/"))
             return new PathInfo("emptyPath", null);
 
+        System.out.println("PATTERNS");
+        System.out.println(patterns);
         for (var entry : patterns.entrySet()) {
+            System.out.println(entry.getValue());
             Matcher matcher = entry.getValue().matcher(path);
 
             if (matcher.matches()) {
@@ -63,6 +69,8 @@ public class PostsServlet extends HttpServlet {
         PathInfo pathInfo = getPath(request);
         String pathName = pathInfo.pathName;
         Matcher matcher = pathInfo.matcher;
+
+        System.out.println(pathName + "PATHNAME");
 
         switch (pathName) {
             case "emptyPath": {
@@ -145,6 +153,7 @@ public class PostsServlet extends HttpServlet {
         String pathName = pathInfo.pathName;
         Matcher matcher = pathInfo.matcher;
 
+
         switch (pathName) {
             case "singleNumberPath": {
                 String idString = matcher.group(1);
@@ -178,31 +187,34 @@ public class PostsServlet extends HttpServlet {
     }
 
     boolean isAuthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String authHeaderValue = request.getHeader("Authorization");
+        HttpSession session = request.getSession(false);
+        System.out.println(session + " SESSION IN CLIENT");
 
-        if (authHeaderValue == null || authHeaderValue.equals("")) {
-            sendError(response, SC_BAD_REQUEST, "Missing authorization method!");
-            return false;
-        }
+//        String authHeaderValue = request.getHeader("Authorization");
 
-        if (!authHeaderValue.startsWith("Bearer")) {
-            sendError(response, SC_BAD_REQUEST, "Not supported method of authorization!");
-            return false;
-        }
+//        if (authHeaderValue == null || authHeaderValue.equals("")) {
+//            sendError(response, SC_BAD_REQUEST, "Missing authorization method!");
+//            return false;
+//        }
+//
+//        if (!authHeaderValue.startsWith("Bearer")) {
+//            sendError(response, SC_BAD_REQUEST, "Not supported method of authorization!");
+//            return false;
+//        }
 
-        String tokenHash = authHeaderValue.split(" ")[1];
-
-        if (tokenHash == null || tokenHash.equals("")) {
-            sendError(response, SC_UNAUTHORIZED, "User is not authorized!");
-            return false;
-        }
-
-        Token token = tokensDAO.getToken(tokenHash);
-
-        if (token.token == null) {
-            sendError(response, SC_UNAUTHORIZED, "This token doesn't exist or is expired! User is not authorized!");
-            return false;
-        }
+//        String tokenHash = authHeaderValue.split(" ")[1];
+//
+//        if (tokenHash == null || tokenHash.equals("")) {
+//            sendError(response, SC_UNAUTHORIZED, "User is not authorized!");
+//            return false;
+//        }
+//
+//        Token token = tokensDAO.getToken(tokenHash);
+//
+//        if (token.token == null) {
+//            sendError(response, SC_UNAUTHORIZED, "This token doesn't exist or is expired! User is not authorized!");
+//            return false;
+//        }
 
         return true;
     }

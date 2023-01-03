@@ -4,6 +4,7 @@ import org.example.Server.Filters.FilterChain;
 import org.example.Server.Filters.Interfaces.Filter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
@@ -16,25 +17,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RequestDispatcher {
-    final List<String> VALID_METHODS = List.of("GET", "POST", "PUT", "DELETE");
+    final static List<String> VALID_METHODS = List.of("GET", "POST", "PUT", "DELETE");
     FilterChain chain;
-    HttpServlet servlet;
-    public Socket socket;
 
-    public RequestDispatcher(HttpServlet servlet, FilterChain chain) {
-        this.servlet = servlet;
+    public RequestDispatcher(FilterChain chain) {
         this.chain = chain;
     }
 
     public void dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String sessionValue = request.getHeader("Session");
-        response.outputStream = socket.getOutputStream();
-
-        if (sessionValue != null)
-            response.addHeader("Session", sessionValue);
-
-        if (!VALID_METHODS.contains(request.method) || request.pathInfo == null || request.pathInfo.equals("")) {
-            System.out.println("BAD REQUEST - INVALID METHOD");
+        if (isRequestInvalid(request)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.addHeader("Content-Type", "text/plain");
             response.getOutputStream().write("Bad Request - Invalid request syntax!".getBytes());
@@ -42,22 +33,16 @@ public class RequestDispatcher {
             return;
         }
 
-        if (request.servlet == null) {
-            System.out.println("BAD REQUEST - MISSING SERVLET");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.addHeader("Content-Type", "text/plain");
-            response.getOutputStream().write("Bad Request - Missing servlet!".getBytes());
-
-            return;
-        }
-
         chain.doFilter(request, response);
 
-        socket.close();
-        System.out.println("SOCKET CLOSED");
+        if (request.httpSession != null) {
+            response.setHeader("Set-Cookie", "SESSION=" + request.httpSession.getId());
+        }
+
+        response.sendResponse();
     }
 
-    public void dispatch(HttpServletRequest request) throws IOException {
-        dispatch(request, new HttpServletResponse());
+    static boolean isRequestInvalid(HttpServletRequest request) {
+        return !VALID_METHODS.contains(request.method) || request.pathInfo == null || request.pathInfo.equals("");
     }
 }

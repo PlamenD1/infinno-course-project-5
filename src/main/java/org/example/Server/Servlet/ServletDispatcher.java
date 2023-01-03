@@ -17,22 +17,19 @@ public class ServletDispatcher {
 
     public void dispatch(HttpServletRequest request, Socket socket) throws IOException {
         int endOfDocBase = request.fullPath.substring(1).indexOf("/");
-        String docPath = request.fullPath.substring(1, endOfDocBase);
+        String docPath = request.fullPath.substring(1, endOfDocBase + 1);
 
         ServletContext context = pathContextPairs.get(docPath);
 
         request.fullPath = request.fullPath.substring(docPath.length() + 1);
+        request.context = context;
 
         RequestDispatcher dispatcher = context.getRequestDispatcher(request.fullPath);
-        dispatcher.socket = socket;
+        HttpServletResponse response = new HttpServletResponse(socket);
 
-        if (context.patternServletPairs.isEmpty()) {
-            dispatcher.dispatch(request);
-            return;
-        }
+        dispatcher.dispatch(request, response);
 
-        HttpServletResponse response = new HttpServletResponse();
-        response.outputStream = socket.getOutputStream();
+        socket.close();
     }
 
     public void addContext(String path, ServletContext context) {

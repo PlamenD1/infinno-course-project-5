@@ -43,11 +43,7 @@ public class ServletContext {
 
         FilterChain chain = getFilterChain(servlet, path);
 
-        RequestDispatcher dispatcher = new RequestDispatcher(servlet, chain);
-        System.out.println(patternServletPairs);
-        System.out.println("servlet: " + servlet);
-
-        return dispatcher;
+        return new RequestDispatcher(chain);
     }
 
     FilterChain getFilterChain(HttpServlet servlet, String path) {
@@ -63,7 +59,6 @@ public class ServletContext {
                 break;
             }
         }
-
 
         if (filter != null)
             chain.filters.add(filter);

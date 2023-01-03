@@ -10,18 +10,17 @@ public abstract class HttpServlet {
     public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         switch (request.method) {
             case "GET": {
-                System.out.println("DO GET DISPATCHER");
-                request.servlet.doGet(request, response);
+                this.doGet(request, response);
                 break;
             }
             case "POST":
-                request.servlet.doPost(request, response);
+                this.doPost(request, response);
                 break;
             case "PUT":
-                request.servlet.doPut(request, response);
+                this.doPut(request, response);
                 break;
             case "DELETE":
-                request.servlet.doDelete(request, response);
+                this.doDelete(request, response);
                 break;
         }
     }

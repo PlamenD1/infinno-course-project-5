@@ -1,9 +1,12 @@
 package org.example.Server.Servlet;
 
+import org.example.Server.Session.Cookie;
+import org.example.Server.Session.HttpSession;
+import org.example.Server.Session.HttpSessionManager;
+
 import java.io.BufferedReader;
 import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class HttpServletRequest {
 
@@ -15,7 +18,9 @@ public class HttpServletRequest {
     String docBase;
     Map<String, String> queryParams = new HashMap<>();
     Map<String, String> headers;
-    Map<String, String> cookies = new HashMap<>();
+    HttpSession httpSession;
+    ServletContext context;
+    List<Cookie> cookies = new ArrayList<>();
 
     public HttpServletRequest(HttpServlet servlet, String method, String pathInfo, Reader bodyReader, Map<String, String> headers, String fullPath, String docBase) {
         this.servlet = servlet;
@@ -26,7 +31,7 @@ public class HttpServletRequest {
         this.fullPath = fullPath;
         this.docBase = docBase;
         buildQueryParams();
-        fillCookiesMap();
+        fillCookiesArray();
     }
 
     void buildQueryParams() {
@@ -43,18 +48,22 @@ public class HttpServletRequest {
         }
     }
 
-    void fillCookiesMap() {
-        String cookiesStr = headers.get("Cookies");
+    void fillCookiesArray() {
+        String cookiesStr = headers.get("Cookie");
         if (cookiesStr == null || cookiesStr.equals(""))
             return;
 
         String[] cookiesArr = cookiesStr.split(";");
-        for (String cookie : cookiesArr) {
-            String[] nameValuePair = cookie.split("=");
-            cookies.put(nameValuePair[0], nameValuePair[1]);
-        }
+        for (String str : cookiesArr) {
+            String[] nameValuePair = str.split("=");
+            Cookie cookie = new Cookie(nameValuePair[0], nameValuePair[1]);
 
-        headers.remove("Cookies");
+            if (cookie.name.trim().equals("SESSION")) {
+                httpSession = HttpSessionManager.getInstance().getSession(cookie.value);
+            }
+
+            cookies.add(cookie);
+        }
     }
 
     public String getHeader(String header) {
@@ -84,5 +93,25 @@ public class HttpServletRequest {
     public String getServletPath() {
         int indexOfEndOfServletName = fullPath.indexOf("/");
         return fullPath.substring(0, indexOfEndOfServletName);
+    }
+
+    Cookie[] getCookies() {
+        return cookies.toArray(new Cookie[0]);
+    }
+
+    public HttpSession getSession() {
+        if (httpSession == null) {
+            httpSession = HttpSessionManager.getInstance().createSession(context);
+        }
+
+        return httpSession;
+    }
+
+    public HttpSession getSession(boolean create) {
+        if (create && httpSession == null) {
+            httpSession = HttpSessionManager.getInstance().createSession(context);
+        }
+
+        return httpSession;
     }
 }
